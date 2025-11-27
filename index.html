@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYC UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+    <style>
+        .slide-up {
+            transform: translateY(0%);
+        }
+
+        .slide-down {
+            transform: translateY(100%);
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paypalBlue: '#0070BA',
+                        paypalLight: '#00A8EA',
+                        paypalDark: '#001C48',
+                        paypalGray: '#F1F4F7'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-paypalGray min-h-screen flex justify-center items-center p-4 font-sans">
+
+    <div class="max-w-7xl w-full bg-white rounded-3xl p-6 shadow-2xl border border-gray-200">
+
+        <!-- Secure -->
+        <div class="flex justify-end mb-6">
+            <div class="flex items-center gap-2 bg-green-600 text-white px-4 py-1 rounded-full text-xs font-medium">
+                <span class="w-2 h-2 bg-white rounded-full"></span>
+                Secure connection
+            </div>
+
+        </div>
+
+        <!-- Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Video Section -->
+            <div class="lg:col-span-2 space-y-4">
+
+                <div
+                    class="relative bg-paypalDark rounded-xl overflow-hidden h-96 md:h-[460px] shadow-lg border border-paypalBlue">
+
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <video id="remoteVideo" autoplay playsinline
+                            class="max-w-full max-h-full object-contain"></video>
+                    </div>
+
+                    <div class="absolute left-4 top-4 text-paypalLight text-sm font-semibold drop-shadow-lg">
+                        ✓ Face detected <br> ✓ Face verified
+                    </div>
+
+                    <div class="absolute left-4 bottom-4 text-paypalLight text-sm font-semibold drop-shadow-lg">
+                        ✓ ID card detected <br> Ready to capture
+                    </div>
+
+                    <div
+                        class="absolute right-4 bottom-4 w-28 h-28 bg-white rounded-lg overflow-hidden shadow-xl border border-paypalBlue">
+                        <!-- <video id="agentVideo" autoplay class="object-cover w-full h-full"></video> -->
+                        <video id="localVideo" autoplay muted playsinline class="w-auto h-full"></video>
+                    </div>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="flex justify-center gap-6 mt-2">
+
+                    <!-- Swipe Camera -->
+                    <button class="p-3 bg-paypalBlue hover:bg-paypalLight transition rounded-full shadow-md">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2997/2997933.png" class="w-6">
+                    </button>
+
+                    <!-- Mute -->
+                    <button class="p-3 bg-paypalBlue hover:bg-paypalLight transition rounded-full shadow-md">
+                        <img src="https://cdn-icons-png.flaticon.com/512/727/727240.png" class="w-6">
+                    </button>
+
+                    <!-- Camera On/Off -->
+                    <button class="p-3 bg-red-600 hover:bg-red-500 transition rounded-full shadow-md">
+                        <img src="https://cdn-icons-png.flaticon.com/512/992/992700.png" class="w-6">
+                    </button>
+
+                    <!-- Chat (Mobile) -->
+                    <button id="openChatBtn"
+                        class="p-3 bg-paypalLight hover:bg-paypalBlue transition rounded-full shadow-md lg:hidden">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2462/2462719.png" class="w-6">
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Chat Desktop -->
+            <div class="hidden lg:flex flex-col bg-paypalGray rounded-2xl p-5 shadow-inner border border-paypalBlue">
+
+                <h2 class="font-semibold text-xl text-paypalDark mb-3">Chat</h2>
+
+                <div id="chatBoxDesktop" class="h-60 overflow-y-auto bg-white rounded-xl p-3 mb-3 shadow-inner border">
+
+                    <div class="mb-3">
+                        <p class="text-gray-600 text-sm"><b>Agent:</b> Please show your ID card</p>
+                    </div>
+
+                    <div class="text-right">
+                        <p class="bg-paypalBlue text-white text-sm inline-block px-3 py-2 rounded-lg shadow-md">
+                            Sure!
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="flex gap-2">
+                    <input class="flex-1 p-2 rounded bg-white border border-gray-400 text-gray-600 text-sm"
+                        placeholder="Write a message">
+                    <button
+                        class="px-4 bg-paypalBlue hover:bg-paypalLight transition text-white rounded-lg shadow-md text-sm">
+                        Send
+                    </button>
+                </div>
+                <!-- <div class="mt-4 text-xs text-gray-600">
+                    <div class="flex items-start gap-3">
+                        <span class="text-yellow-500 text-lg">⚠️</span>
+                        <div>
+                            <p class="font-semibold text-paypalDark">Disclaimer</p>
+                            <p class="mt-1">
+                                Video and chat are used solely for identity verification. Do not share passwords, PINs,
+                                or other sensitive credentials.
+                                By continuing you consent to recording and processing of necessary verification data in
+                                accordance with our
+                                <a href="#" class="text-paypalBlue underline">Privacy Policy</a>.
+                            </p>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Mobile Chat Panel -->
+    <div id="mobileChat"
+        class="fixed bottom-0 left-0 w-full bg-paypalDark text-white rounded-t-3xl p-5 z-50 transition-all duration-300 slide-down lg:hidden">
+
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold">Chat</h2>
+            <button id="closeChatBtn" class="p-2 bg-paypalBlue rounded-full shadow-md">
+                <img src="https://cdn-icons-png.flaticon.com/512/130/130906.png" class="w-5">
+            </button>
+        </div>
+
+        <div id="chatBoxMobile"
+            class="h-64 overflow-y-auto bg-paypalGray text-gray-700 rounded-xl p-3 text-sm mb-3 shadow-inner border">
+            <div class="mb-3">
+                <p><b>Agent:</b> Please show your ID card</p>
+            </div>
+            <div class="text-right">
+                <p class="bg-paypalBlue text-white inline-block px-3 py-2 rounded-lg shadow-md">Sure!</p>
+            </div>
+        </div>
+
+        <div class="flex gap-2">
+            <input class="flex-1 p-2 rounded bg-white text-gray-700 border" placeholder="Write message">
+            <button class="px-4 bg-paypalBlue hover:bg-paypalLight transition rounded-lg shadow-md">
+                Send
+            </button>
+        </div>
+
+    </div>
+    <br>
+    <!-- extra box -->
+    <div class="mt-5 w-full max-w-lg bg-gray-800 text-green-300 text-xs p-2 rounded h-40 overflow-y-auto ">
+        <p id="status" class="text-gray-700 mb-4">Status: Starting...</p>
+        <input type="text" id="remoteId" placeholder="Enter remote ID"
+            class="w-64 p-2 border border-gray-300 rounded mb-2" />
+        <button id="connect" class="bg-blue-500 text-white px-4 py
+-2 rounded hover:bg-blue-600 mb-2">
+            Call
+        </button>
+        <div class="flex gap-4">
+
+        </div>
+        <!-- local peer id -->
+        <p class="text-lg mb-2">
+            Your Peer ID:
+            <span id="peerId" class="text-blue-600 font-mono">Initializing...</span>
+            <button id="copyPeerId" class="ml-2 bg-gray-200 text-sm px-2 py-1 rounded hover:bg-gray-300">
+                Copy
+            </button>
+        </p>
+
+    </div>
+    <!-- JS -->
+    <script>
+        const mobileChat = document.getElementById("mobileChat");
+        const openChatBtn = document.getElementById("openChatBtn");
+        const closeChatBtn = document.getElementById("closeChatBtn");
+
+        openChatBtn.addEventListener("click", () => {
+            mobileChat.classList.remove("slide-down");
+            mobileChat.classList.add("slide-up");
+        });
+
+        closeChatBtn.addEventListener("click", () => {
+            mobileChat.classList.add("slide-down");
+            mobileChat.classList.remove("slide-up");
+        });
+
+        // PeerJS setup for video calling
+        const ui = {
+            peerId: document.getElementById("peerId"),
+            connectBtn: document.getElementById("connect"),
+            status: document.getElementById("status"),
+            logBox: document.getElementById("logs"),
+            localVideo: document.getElementById("localVideo"),
+            remoteVideo: document.getElementById("remoteVideo"),
+            remoteIdInput: document.getElementById("remoteId"),
+        };
+
+        function log(msg, type = "info") {
+            const time = new Date().toLocaleTimeString();
+            const line = document.createElement("div");
+            line.textContent = `[${time}] ${msg}`;
+            line.classList.add(type === "error" ? "text-red-400" : "text-green-300");
+            // ui.logBox.appendChild(line);
+            // ui.logBox.scrollTop = ui.logBox.scrollHeight;
+            console.log(msg);
+        }
+
+        let peer, localStream, currentCall;
+        let initAttempts = 0;
+        const maxAttempts = 3;
+
+        const iceConfig = {
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                {
+                    urls: [
+                        "turn:relay1.expressturn.com:3480?transport=udp",
+                        "turn:relay1.expressturn.com:3480?transport=tcp",
+                    ],
+                    username: "000000002078920456",
+                    credential: "7au5gxraKlawrx09qC45ARXNpoM=",
+                },
+                {
+                    urls: [
+                        "stun:bn-turn2.xirsys.com",
+                        "turn:bn-turn2.xirsys.com:3478?transport=udp",
+                        "turn:bn-turn2.xirsys.com:3478?transport=tcp",
+                        "turns:bn-turn2.xirsys.com:443?transport=tcp",
+                    ],
+                    username:
+                        "IV3rRPe9k4M8o1GyU7564eGUVmdQWRQXD5vHZIclMog1gOW9ixXSmbMYX79syFHNAAAAAGkdzuF0YXJpa3VsNzg=",
+                    credential: "ef63c548-c550-11f0-b337-0242ac140004",
+                },
+            ]
+        };
+
+        async function initMedia() {
+            try {
+                ui.status.textContent = "Status: requesting mic/cam...";
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                ui.localVideo.srcObject = localStream;
+                log("Media granted");
+            } catch (err) {
+                log("Media error: " + err.message, "error");
+                alert("Camera/Mic blocked");
+            }
+        }
+
+        function initPeer() {
+            if (initAttempts >= maxAttempts) {
+                log("Max PeerJS init attempts reached", "error");
+                return;
+            }
+
+            initAttempts++;
+            log("Initializing PeerJS (attempt " + initAttempts + ")");
+
+            ui.status.textContent = "Status: initializing connection...";
+
+            peer = new Peer(undefined, {
+                host: "0.peerjs.com",
+                port: 443,
+                path: "/",
+                secure: true,
+                debug: 2,
+                config: iceConfig,
+            });
+
+            peer.on("open", id => {
+                ui.peerId.textContent = id;
+                ui.status.textContent = "Status: Ready to Call";
+                log("PeerJS Open: " + id);
+            });
+
+            peer.on("error", err => {
+                log("Peer Error: " + err.type, "error");
+                if (initAttempts < maxAttempts) {
+                    setTimeout(initPeer, 2000);
+                }
+            });
+
+            peer.on("disconnected", () => {
+                log("Peer disconnected → reconnecting");
+                peer.reconnect();
+            });
+
+            peer.on("call", call => {
+                log("Incoming call from " + call.peer);
+                call.answer(localStream);
+                setupCallEvents(call);
+            });
+        }
+
+        function setupCallEvents(call) {
+            currentCall = call;
+            ui.status.textContent = "Status: Connecting...";
+
+            call.on("stream", remoteStream => {
+                ui.remoteVideo.srcObject = remoteStream;
+                ui.status.textContent = "Status: Connected ✔";
+                log("Remote stream received");
+            });
+
+            call.on("close", () => {
+                ui.status.textContent = "Status: Call Ended";
+                log("Call closed");
+            });
+
+            call.on("error", err => {
+                log("Call Error: " + err.message, "error");
+                ui.status.textContent = "Status: Error";
+            });
+        }
+
+        function startCall() {
+            const remoteId = ui.remoteIdInput.value.trim();
+            if (!remoteId) return alert("Enter remote ID");
+
+            log("Calling " + remoteId);
+            const call = peer.call(remoteId, localStream);
+            setupCallEvents(call);
+        }
+
+        ui.connectBtn.addEventListener("click", startCall);
+
+        document.getElementById("copyPeerId").addEventListener("click", () => {
+            navigator.clipboard.writeText(ui.peerId.textContent);
+            log("Peer ID copied");
+            alert("Copied!");
+        });
+
+        // Start everything
+        (async () => {
+            await initMedia();
+            initPeer();
+        })();
+    </script>
+
+</body>
+
+</html>
